@@ -1,0 +1,20 @@
+<h1 class="text-center">{{user.userName}}</h1>
+<p class="text-center">Edita aqui tu perfil</p>
+<div class="my-5 text-center">
+    {{!-- validamos que la imagen venga de la base de datos --}}
+    {{#if imagen}}
+        <img src="/img/perfiles/{{imagen}}" alt="" class="rounded-circle border border-danger">
+        {{else}}
+        <img src="/img/perfiles/perfil.jpg" alt="" class="rounded-circle border border-danger">
+    {{/if}}
+
+</div>
+
+
+<form action="/perfil?_csrf={{csrfToken}}" method="post" enctype="multipart/form-data" > 
+
+    <input class="form-control form-control-lg" id="formFileLg" type="file" name="myFile">
+    <button class="btn btn-dark my-3">Cambiar imagen de perfil</button>
+</form> 
+{{!-- el action /perfil?_csrf={{csrfToken}} estamos enviando el crftoken en forma de llave para que nos valide nuestro formulario de que pertenece al de nosotros --}}
+
