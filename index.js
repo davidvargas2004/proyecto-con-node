@@ -8,18 +8,34 @@ const csrf = require("csurf")
 
 
 const User = require("./models/User.js");
+const MongoStore = require("connect-mongo");
+const { options } = require("./routes/home");
 require('dotenv').config();
-require('./database/db.js');
+const clientDB = require('./database/db.js');
+const mongoSanitize = require("express-mongo-sanitize");
+const cors = require("cors");
 
 
 const app = express();
 
+const corsOptions ={
+    credentials: true,
+    origin: process.env.PATHHEROKU || "*",
+    methods: ['GET', 'POST'],
+};
+
+app.use(cors());
 
 app.use(session({
-    secret: 'keyboard cat',
+    secret: process.env.SECRETSESSION,
     reverse: false,
     saveUninitialized: false,
-    name:'secret-name-blablabla',
+    name:'session-user',
+    store:MongoStore.create({
+        clientPromise: clientDB,
+        dbName: process.env.DBNAME
+        }),
+        cookie: { secure: process.env.MODO === 'production', maxAge: 30 * 24 * 60 * 60 * 1000 },//es la seguridad para las sesiones desplegada a al base de datos,(esto hace cuento dura la sesion abierta)
     })
 );
 
@@ -48,7 +64,7 @@ app.set("views", "./views");
 app.use(express.urlencoded({extended:true}))
 
 app.use(csrf()); // aplicativo para el uso de seguridar en token en cuenta, agrega un token a los formularios
-
+app.use(mongoSanitize());
 
 app.use((req,res,next) => { 
     res.locals.csrfToken = req.csrfToken()
